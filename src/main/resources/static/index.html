@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Construction Waste Management Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'eco-green': {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            'industrial-orange': {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-eco-900 via-eco-800 to-slate-900 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="p-2.5 bg-industrial-orange-500 rounded-lg shadow">
+          <i class="fa-solid fa-recycle text-2xl text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            BuildCycle <span class="text-xs bg-industrial-orange-600 uppercase font-semibold px-2 py-0.5 rounded text-white tracking-wider">Waste Control</span>
+          </h1>
+          <p class="text-xs text-eco-100">Construction Site Environmental & Resource Monitoring</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4 text-sm">
+        <div class="flex items-center space-x-2 bg-black/20 px-3 py-1.5 rounded-full border border-white/10">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-eco-500 animate-pulse"></span>
+          <span class="text-xs font-medium text-slate-200">Site Status: Active Sync</span>
+        </div>
+        <button id="refreshBtn" onclick="fetchWasteLogs()" class="px-3 py-1.5 bg-eco-700 hover:bg-eco-600 rounded-md text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i> Refresh Data
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120%] opacity-0 pointer-events-none"></div>
+
+  <!-- Main Content -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- KPI Dashboard Cards -->
+    <section>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1: Total Waste Logged -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Waste Logged</p>
+            <h2 id="kpiTotalWaste" class="text-3xl font-extrabold text-slate-800 mt-2">0.00 <span class="text-base font-semibold text-slate-400">Tons</span></h2>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+              <i class="fa-solid fa-weight-hanging text-slate-400"></i> Aggregated site waste
+            </p>
+          </div>
+          <div class="p-4 bg-industrial-orange-50 text-industrial-orange-600 rounded-xl">
+            <i class="fa-solid fa-dumpster text-3xl"></i>
+          </div>
+        </div>
+
+        <!-- Card 2: Est. Financial Loss -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Est. Financial Loss</p>
+            <h2 id="kpiFinancialLoss" class="text-3xl font-extrabold text-industrial-orange-600 mt-2">₹0</h2>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+              <i class="fa-solid fa-chart-line text-industrial-orange-500"></i> Cumulative estimated loss
+            </p>
+          </div>
+          <div class="p-4 bg-red-50 text-red-500 rounded-xl">
+            <i class="fa-solid fa-indian-rupee-sign text-3xl"></i>
+          </div>
+        </div>
+
+        <!-- Card 3: Recycle / Reuse Rate -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Recycle / Reuse Rate</p>
+            <h2 id="kpiRecycleRate" class="text-3xl font-extrabold text-eco-700 mt-2">0.0%</h2>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+              <i class="fa-solid fa-leaf text-eco-600"></i> Diverted from landfill
+            </p>
+          </div>
+          <div class="p-4 bg-eco-50 text-eco-600 rounded-xl">
+            <i class="fa-solid fa-arrow-rotate-right text-3xl"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Entry Form Section -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+      <div class="border-b border-slate-200 px-6 py-4 bg-slate-50/75 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-eco-600 text-white text-xs">
+            <i class="fa-solid fa-plus"></i>
+          </span>
+          <h2 class="text-lg font-bold text-slate-800">Log New Waste Entry</h2>
+        </div>
+        <span class="text-xs font-medium text-slate-400">All fields required</span>
+      </div>
+
+      <form id="wasteForm" onsubmit="handleFormSubmit(event)" class="p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Date -->
+          <div>
+            <label for="date" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Date</label>
+            <div class="relative">
+              <input type="date" id="date" name="date" required
+                class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
+            </div>
+          </div>
+
+          <!-- Site Zone -->
+          <div>
+            <label for="siteZone" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Site Zone</label>
+            <select id="siteZone" name="siteZone" required
+              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
+              <option value="" disabled selected>Select Site Zone</option>
+              <option value="Zone A - Foundation & Basement">Zone A - Foundation & Basement</option>
+              <option value="Zone B - Structural Tower">Zone B - Structural Tower</option>
+              <option value="Zone C - Interior Finishing">Zone C - Interior Finishing</option>
+              <option value="Zone D - External Facade">Zone D - External Facade</option>
+              <option value="Zone E - Storage & Staging">Zone E - Storage & Staging</option>
+            </select>
+          </div>
+
+          <!-- Material -->
+          <div>
+            <label for="material" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Material</label>
+            <input type="text" id="material" name="material" placeholder="e.g., Concrete, Rebar, Drywall" required
+              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
+          </div>
+
+          <!-- Weight (kg) -->
+          <div>
+            <label for="weight" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Weight (kg)</label>
+            <input type="number" step="0.01" min="0" id="weight" name="weight" placeholder="e.g., 1250" required
+              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
+          </div>
+
+          <!-- Cause -->
+          <div>
+            <label for="cause" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Cause</label>
+            <input type="text" id="cause" name="cause" placeholder="e.g., Off-cuts, Demolition, Over-order" required
+              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
+          </div>
+
+          <!-- Disposal Route -->
+          <div>
+            <label for="disposalRoute" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Route</label>
+            <select id="disposalRoute" name="disposalRoute" required
+              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
+              <option value="" disabled selected>Select Route</option>
+              <option value="Recycle">Recycle</option>
+              <option value="Reuse">Reuse</option>
+              <option value="Landfill">Landfill</option>
+              <option value="Incineration">Incineration</option>
+              <option value="Hazardous Treatment">Hazardous Treatment</option>
+            </select>
+          </div>
+
+          <!-- Hazard Level -->
+          <div>
+            <label for="hazardLevel" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Hazard Level</label>
+            <select id="hazardLevel" name="hazardLevel" required
+              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
+              <option value="" disabled selected>Select Hazard Level</option>
+              <option value="Non-Hazardous">Non-Hazardous</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Hazardous">Hazardous</option>
+            </select>
+          </div>
+
+          <!-- Vendor -->
+          <div>
+            <label for="vendor" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Vendor / Contractor</label>
+            <input type="text" id="vendor" name="vendor" placeholder="e.g., EcoHaul Solutions" required
+              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
+          </div>
+
+          <!-- Estimated Loss -->
+          <div>
+            <label for="estimatedLoss" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Estimated Loss (₹)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-medium">₹</span>
+              <input type="number" step="0.01" min="0" id="estimatedLoss" name="estimatedLoss" placeholder="0.00" required
+                class="w-full rounded-lg border-slate-300 border pl-7 pr-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3 items-center">
+          <button type="reset" class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+            Clear Form
+          </button>
+          <button type="submit" id="submitBtn" class="px-6 py-2.5 rounded-lg bg-industrial-orange-600 hover:bg-industrial-orange-700 text-white text-sm font-semibold shadow-sm transition flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Log Waste Entry</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Data Table Section -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+      <div class="border-b border-slate-200 px-6 py-4 bg-slate-50/75 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div class="flex items-center space-x-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-white text-xs">
+            <i class="fa-solid fa-list-check"></i>
+          </span>
+          <h2 class="text-lg font-bold text-slate-800">Recent Waste Logs</h2>
+        </div>
+        <span id="logCountBadge" class="text-xs bg-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded-full">
+          0 logs recorded
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100/80 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
+              <th class="py-3 px-4">Date</th>
+              <th class="py-3 px-4">Site Zone</th>
+              <th class="py-3 px-4">Material</th>
+              <th class="py-3 px-4 text-right">Weight (kg)</th>
+              <th class="py-3 px-4">Cause</th>
+              <th class="py-3 px-4">Disposal Route</th>
+              <th class="py-3 px-4">Hazard Level</th>
+              <th class="py-3 px-4">Vendor</th>
+              <th class="py-3 px-4 text-right">Estimated Loss</th>
+            </tr>
+          </thead>
+          <tbody id="wasteTableBody" class="divide-y divide-slate-100 text-sm">
+            <tr>
+              <td colspan="9" class="py-10 text-center text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-xl mb-2 text-eco-600 block"></i>
+                Loading waste records...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <p>&copy; 2026 Construction Waste Management System. All rights reserved.</p>
+      <div class="flex items-center space-x-2 text-slate-400">
+        <span>Spring Boot 3-Tier Architecture</span>
+        <span>•</span>
+        <span>REST Client Frontend</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    const GET_URL = 'http://localhost:8080/api/waste/all';
+    const POST_URL = 'http://localhost:8080/api/waste/add';
+
+    // Set default date input to today
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateInput = document.getElementById('date');
+      if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+      fetchWasteLogs();
+    });
+
+    /**
+     * Display a floating feedback toast notification
+     */
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const isSuccess = type === 'success';
+      const bgColor = isSuccess ? 'bg-eco-700' : 'bg-red-600';
+      const icon = isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+      toast.className = `fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-lg text-white shadow-lg ${bgColor} transform transition-all duration-300 translate-y-0 opacity-100`;
+      toast.innerHTML = `
+        <i class="fa-solid ${icon} text-lg"></i>
+        <span class="text-sm font-medium">${message}</span>
+      `;
+
+      setTimeout(() => {
+        toast.className = 'fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120%] opacity-0 pointer-events-none';
+      }, 4000);
+    }
+
+    /**
+     * Format currency to INR
+     */
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    /**
+     * Return hazard badge markup
+     */
+    function getHazardBadge(level) {
+      const lvl = (level || '').toLowerCase();
+      if (lvl.includes('hazardous') && !lvl.includes('non')) {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
+                  <span class="w-1.5 h-1.5 mr-1 bg-red-500 rounded-full"></span>Hazardous
+                </span>`;
+      } else if (lvl.includes('moderate')) {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-industrial-orange-100 text-industrial-orange-700 border border-industrial-orange-200">
+                  <span class="w-1.5 h-1.5 mr-1 bg-industrial-orange-500 rounded-full"></span>Moderate
+                </span>`;
+      }
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-eco-100 text-eco-800 border border-eco-200">
+                <span class="w-1.5 h-1.5 mr-1 bg-eco-600 rounded-full"></span>Non-Hazardous
+              </span>`;
+    }
+
+    /**
+     * Return disposal route badge markup
+     */
+    function getDisposalBadge(route) {
+      const r = (route || '').toLowerCase();
+      if (r === 'recycle' || r === 'reuse') {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-eco-100 text-eco-800">
+                  <i class="fa-solid fa-recycle text-[10px] mr-1 text-eco-600"></i>${route}
+                </span>`;
+      }
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700">
+                <i class="fa-solid fa-arrow-right text-[10px] mr-1 text-slate-400"></i>${route}
+              </span>`;
+    }
+
+    /**
+     * Compute KPI cards based on waste logs
+     */
+    function updateKPIs(logs) {
+      let totalWeightKg = 0;
+      let totalLoss = 0;
+      let recycledWeightKg = 0;
+
+      logs.forEach(log => {
+        const weight = parseFloat(log.weight) || 0;
+        const loss = parseFloat(log.estimatedLoss) || 0;
+        totalWeightKg += weight;
+        totalLoss += loss;
+
+        const route = (log.disposalRoute || '').toLowerCase();
+        if (route === 'recycle' || route === 'reuse') {
+          recycledWeightKg += weight;
+        }
+      });
+
+      // Convert kg to metric tons
+      const totalTons = totalWeightKg / 1000;
+      const recycleRate = totalWeightKg > 0 ? (recycledWeightKg / totalWeightKg) * 100 : 0;
+
+      document.getElementById('kpiTotalWaste').innerHTML = `${totalTons.toFixed(2)} <span class="text-base font-semibold text-slate-400">Tons</span>`;
+      document.getElementById('kpiFinancialLoss').textContent = formatCurrency(totalLoss);
+      document.getElementById('kpiRecycleRate').textContent = `${recycleRate.toFixed(1)}%`;
+      document.getElementById('logCountBadge').textContent = `${logs.length} ${logs.length === 1 ? 'log' : 'logs'} recorded`;
+    }
+
+    /**
+     * Render the waste records into the table
+     */
+    function renderTable(logs) {
+      const tbody = document.getElementById('wasteTableBody');
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="py-12 text-center text-slate-400">
+              <i class="fa-regular fa-folder-open text-3xl mb-2 text-slate-300 block"></i>
+              No construction waste records found. Use the form above to log waste.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(item => `
+        <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+          <td class="py-3 px-4 font-medium text-slate-800 whitespace-nowrap">${escapeHTML(item.date || '-')}</td>
+          <td class="py-3 px-4 text-slate-600">${escapeHTML(item.siteZone || '-')}</td>
+          <td class="py-3 px-4 font-semibold text-slate-800">${escapeHTML(item.material || '-')}</td>
+          <td class="py-3 px-4 text-right font-medium text-slate-700">${(parseFloat(item.weight) || 0).toLocaleString()} kg</td>
+          <td class="py-3 px-4 text-slate-600">${escapeHTML(item.cause || '-')}</td>
+          <td class="py-3 px-4">${getDisposalBadge(item.disposalRoute)}</td>
+          <td class="py-3 px-4">${getHazardBadge(item.hazardLevel)}</td>
+          <td class="py-3 px-4 text-slate-600">${escapeHTML(item.vendor || '-')}</td>
+          <td class="py-3 px-4 text-right font-semibold text-industrial-orange-600">${formatCurrency(parseFloat(item.estimatedLoss) || 0)}</td>
+        </tr>
+      `).join('');
+    }
+
+    /**
+     * Prevent XSS injections
+     */
+    function escapeHTML(str) {
+      if (typeof str !== 'string') return str;
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    /**
+     * GET request to fetch waste logs
+     */
+    async function fetchWasteLogs() {
+      const refreshIcon = document.getElementById('refreshIcon');
+      if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+      try {
+        const response = await fetch(GET_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        const logs = Array.isArray(data) ? data : [];
+        renderTable(logs);
+        updateKPIs(logs);
+      } catch (error) {
+        console.error('Error fetching waste records:', error);
+        // Fallback UI indication
+        const tbody = document.getElementById('wasteTableBody');
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="py-10 text-center text-red-500">
+              <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-400 block"></i>
+              Unable to load waste logs from server (${escapeHTML(error.message)}).<br>
+              <span class="text-xs text-slate-400">Ensure the Spring Boot backend is running at ${escapeHTML(GET_URL)}.</span>
+            </td>
+          </tr>
+        `;
+      } finally {
+        if (refreshIcon) {
+          setTimeout(() => refreshIcon.classList.remove('fa-spin'), 400);
+        }
+      }
+    }
+
+    /**
+     * POST request to add a new waste log
+     */
+    async function handleFormSubmit(event) {
+      event.preventDefault();
+      const form = event.target;
+      const submitBtn = document.getElementById('submitBtn');
+
+      const formData = {
+        date: form.date.value,
+        siteZone: form.siteZone.value,
+        material: form.material.value,
+        weight: parseFloat(form.weight.value),
+        cause: form.cause.value,
+        disposalRoute: form.disposalRoute.value,
+        hazardLevel: form.hazardLevel.value,
+        vendor: form.vendor.value,
+        estimatedLoss: parseFloat(form.estimatedLoss.value)
+      };
+
+      const originalBtnHTML = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
+
+      try {
+        const response = await fetch(POST_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+
+        showToast('Waste log entry added successfully!', 'success');
+        form.reset();
+        // Reset date back to today
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        // Refresh table and KPIs
+        await fetchWasteLogs();
+      } catch (error) {
+        console.error('Error adding waste record:', error);
+        showToast(`Failed to add record: ${error.message}`, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+      }
+    }
+  </script>
+</body>
+</html>
