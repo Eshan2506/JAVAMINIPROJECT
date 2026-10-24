@@ -12,9 +12,10 @@
       theme: {
         extend: {
           colors: {
-            'eco-green': {
+            'eco': {
               50: '#f0fdf4',
               100: '#dcfce7',
+              200: '#bbf7d0',
               500: '#22c55e',
               600: '#16a34a',
               700: '#15803d',
@@ -243,16 +244,23 @@
           </div>
         </div>
 
-        <div class="mt-6 flex justify-end gap-3 items-center">
-          <button type="reset"
-            class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
-            Clear Form
+        <div class="mt-6 flex flex-col sm:flex-row justify-between gap-3 items-center">
+          <button type="button" onclick="fillDemoData()"
+            class="px-4 py-2 rounded-lg text-xs font-semibold text-eco-700 bg-eco-50 hover:bg-eco-100 border border-eco-200 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Quick Fill Sample Data</span>
           </button>
-          <button type="submit" id="submitBtn"
-            class="px-6 py-2.5 rounded-lg bg-industrial-orange-600 hover:bg-industrial-orange-700 text-white text-sm font-semibold shadow-sm transition flex items-center gap-2">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>Log Waste Entry</span>
-          </button>
+          <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <button type="reset"
+              class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+              Clear Form
+            </button>
+            <button type="submit" id="submitBtn"
+              class="px-6 py-2.5 rounded-lg bg-industrial-orange-600 hover:bg-industrial-orange-700 text-white text-sm font-semibold shadow-sm transition flex items-center gap-2">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>Log Waste Entry</span>
+            </button>
+          </div>
         </div>
       </form>
     </section>
@@ -556,6 +564,22 @@
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnHTML;
       }
+    }
+
+    /**
+     * Helper to auto-fill sample valid data into the form
+     */
+    function fillDemoData() {
+      const form = document.getElementById('wasteForm');
+      form.date.value = new Date().toISOString().split('T')[0];
+      form.siteZone.value = 'Zone B - Structural Tower';
+      form.material.value = 'Concrete Offcuts';
+      form.weight.value = '650';
+      form.cause.value = 'Formwork Overfill';
+      form.disposalRoute.value = 'Recycle';
+      form.hazardLevel.value = 'Non-Hazardous';
+      form.vendor.value = 'GreenCycle Haulers';
+      form.estimatedLoss.value = '9750';
     }
   </script>
 </body>
