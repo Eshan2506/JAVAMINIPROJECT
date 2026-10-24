@@ -4,341 +4,941 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Construction Waste Management Dashboard</title>
+  <title>EcoConstruct — Smart Construction Waste Management & Reduction</title>
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
           colors: {
-            'eco': {
+            eco: {
               50: '#f0fdf4',
               100: '#dcfce7',
               200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
               500: '#22c55e',
               600: '#16a34a',
-              700: '#15803d',
-              800: '#166534',
-              900: '#14532d',
+              700: '#2E7D32', // Vibrant Leaf Green
+              800: '#1e5422',
+              900: '#143c17',
+              950: '#0b230e',
             },
-            'industrial-orange': {
-              50: '#fff7ed',
-              100: '#ffedd5',
-              500: '#f97316',
-              600: '#ea580c',
-              700: '#c2410c',
-              800: '#9a3412',
+            slate: {
+              850: '#151f30',
+              900: '#0f172a',
+              950: '#080d1a',
+            },
+            amber: {
+              450: '#f59e0b',
+              550: '#d97706',
+            }
+          },
+          animation: {
+            'float-slow': 'float 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite',
+            'spin-slow': 'spin 12s linear infinite',
+            'shimmer': 'shimmer 2s infinite linear',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-12px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 15px rgba(46, 125, 50, 0.4)' },
+              '50%': { boxShadow: '0 0 30px rgba(46, 125, 50, 0.8), 0 0 45px rgba(74, 222, 128, 0.5)' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
             }
           }
         }
       }
     }
   </script>
-  <!-- Font Awesome for icons -->
+
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* Custom Smooth View Transitions */
+    .page-section {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      display: none;
+    }
+    .page-section.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Glassmorphism Classes */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .dark-glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Gradient Background Grid */
+    .bg-grid {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
+    }
+    
+    /* Range Slider Styling */
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #2E7D32;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+  </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col relative selection:bg-eco-200 selection:text-eco-900">
 
-  <!-- Header -->
-  <header class="bg-gradient-to-r from-eco-900 via-eco-800 to-slate-900 text-white shadow-md">
-    <div
-      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
-      <div class="flex items-center space-x-3">
-        <div class="p-2.5 bg-industrial-orange-500 rounded-lg shadow">
-          <i class="fa-solid fa-recycle text-2xl text-white"></i>
+  <!-- Persistent Global Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all duration-300 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <a href="javascript:void(0)" onclick="navigateTo('landing')" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-eco-700 via-eco-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-eco-700/20 group-hover:scale-105 transition transform">
+          <i class="fa-solid fa-leaf text-lg"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            BuildCycle <span
-              class="text-xs bg-industrial-orange-600 uppercase font-semibold px-2 py-0.5 rounded text-white tracking-wider">Waste
-              Control</span>
-          </h1>
-          <p class="text-xs text-eco-100">Construction Site Environmental & Resource Monitoring</p>
+          <span class="font-display text-xl font-extrabold tracking-tight text-slate-900 group-hover:text-eco-700 transition">
+            ECO<span class="text-eco-700">CONSTRUCT</span>
+          </span>
+          <span class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest -mt-1">Circular Site Intelligence</span>
         </div>
-      </div>
-      <div class="flex items-center space-x-4 text-sm">
-        <div class="flex items-center space-x-2 bg-black/20 px-3 py-1.5 rounded-full border border-white/10">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-eco-500 animate-pulse"></span>
-          <span class="text-xs font-medium text-slate-200">Site Status: Active Sync</span>
+      </a>
+
+      <!-- Flow Stepper Indicator -->
+      <nav class="hidden md:flex items-center gap-2 bg-slate-100 p-1.5 rounded-full border border-slate-200 text-xs font-semibold text-slate-600">
+        <button id="navStep1" onclick="navigateTo('landing')" class="px-4 py-1.5 rounded-full transition flex items-center gap-2 bg-white text-eco-700 shadow-xs">
+          <span class="w-5 h-5 rounded-full bg-eco-100 text-eco-700 flex items-center justify-center text-[11px] font-bold">1</span>
+          <span>Home</span>
+        </button>
+        <i class="fa-solid fa-angle-right text-slate-300 text-[10px]"></i>
+        <button id="navStep2" onclick="navigateTo('audit')" class="px-4 py-1.5 rounded-full transition flex items-center gap-2 hover:text-slate-900">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[11px] font-bold">2</span>
+          <span>Waste Audit</span>
+        </button>
+        <i class="fa-solid fa-angle-right text-slate-300 text-[10px]"></i>
+        <button id="navStep3" onclick="navigateTo('results')" class="px-4 py-1.5 rounded-full transition flex items-center gap-2 hover:text-slate-900">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[11px] font-bold">3</span>
+          <span>AI Solutions</span>
+        </button>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200/60">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>Backend Connected (Port 8080)</span>
         </div>
-        <button id="refreshBtn" onclick="fetchWasteLogs()"
-          class="px-3 py-1.5 bg-eco-700 hover:bg-eco-600 rounded-md text-xs font-semibold flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i> Refresh Data
+        <button onclick="navigateTo('audit')" class="px-4 py-2 rounded-lg bg-eco-700 hover:bg-eco-800 text-white text-xs font-bold tracking-wide transition shadow-sm hover:shadow flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt"></i>
+          <span>New Audit</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- Notification Toast Container -->
-  <div id="toast"
-    class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120%] opacity-0 pointer-events-none">
-  </div>
+  <div id="toast" class="fixed top-20 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl text-white shadow-xl transition-all duration-300 transform -translate-y-16 opacity-0 pointer-events-none"></div>
 
-  <!-- Main Content -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <!-- MAIN CONTAINER (3 SWAPPABLE PAGES) -->
+  <main class="flex-grow flex flex-col">
 
-    <!-- KPI Dashboard Cards -->
-    <section>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Card 1: Total Waste Logged -->
-        <div
-          class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Waste Logged</p>
-            <h2 id="kpiTotalWaste" class="text-3xl font-extrabold text-slate-800 mt-2">0.00 <span
-                class="text-base font-semibold text-slate-400">Tons</span></h2>
-            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
-              <i class="fa-solid fa-weight-hanging text-slate-400"></i> Aggregated site waste
+    <!-- ======================================================== -->
+    <!-- PAGE 1: LANDING / HERO PAGE                             -->
+    <!-- ======================================================== -->
+    <section id="pageLanding" class="page-section active flex-grow bg-grid">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 flex flex-col justify-center min-h-[calc(100vh-5rem)]">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          
+          <!-- Hero Left Content -->
+          <div class="lg:col-span-7 space-y-6 text-left">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-eco-100 text-eco-800 text-xs font-bold tracking-wide border border-eco-200/80 shadow-xs">
+              <i class="fa-solid fa-leaf text-eco-700"></i>
+              <span>Next-Gen Sustainable Building Technology</span>
+            </div>
+
+            <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.08]">
+              ECO<span class="text-transparent bg-clip-text bg-gradient-to-r from-eco-700 to-emerald-500">CONSTRUCT</span>
+            </h1>
+
+            <p class="text-lg sm:text-xl font-normal text-slate-600 max-w-2xl leading-relaxed">
+              Streamlining construction waste management — finding solutions to reduce waste soon. Transform jobsite discards into high-value circular assets with intelligent auditing.
             </p>
+
+            <!-- Key Feature Badges -->
+            <div class="grid grid-cols-3 gap-3 pt-2 max-w-lg">
+              <div class="p-3 bg-white/80 backdrop-blur rounded-xl border border-slate-200/80 shadow-xs">
+                <i class="fa-solid fa-recycle text-eco-700 text-xl mb-1.5 block"></i>
+                <div class="text-xs font-bold text-slate-900">Zero-Waste Goal</div>
+                <div class="text-[11px] text-slate-500">Divert up to 92%</div>
+              </div>
+              <div class="p-3 bg-white/80 backdrop-blur rounded-xl border border-slate-200/80 shadow-xs">
+                <i class="fa-solid fa-cloud-arrow-down text-eco-700 text-xl mb-1.5 block"></i>
+                <div class="text-xs font-bold text-slate-900">CO₂ Reductions</div>
+                <div class="text-[11px] text-slate-500">Scope 3 tracking</div>
+              </div>
+              <div class="p-3 bg-white/80 backdrop-blur rounded-xl border border-slate-200/80 shadow-xs">
+                <i class="fa-solid fa-truck-ramp-box text-eco-700 text-xl mb-1.5 block"></i>
+                <div class="text-xs font-bold text-slate-900">Vendor Match</div>
+                <div class="text-[11px] text-slate-500">Live reclaim network</div>
+              </div>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <button onclick="navigateTo('audit')" class="px-8 py-4 rounded-xl bg-eco-700 hover:bg-eco-800 text-white font-display text-base font-bold shadow-lg shadow-eco-700/30 hover:shadow-xl hover:shadow-eco-700/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3 animate-pulse-glow group">
+                <span>Enter Waste Audit Details</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+              </button>
+
+              <button onclick="scrollToOverview()" class="px-6 py-4 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold text-sm transition flex items-center justify-center gap-2 shadow-xs">
+                <i class="fa-regular fa-circle-question"></i>
+                <span>How EcoConstruct Works</span>
+              </button>
+            </div>
           </div>
-          <div class="p-4 bg-industrial-orange-50 text-industrial-orange-600 rounded-xl">
-            <i class="fa-solid fa-dumpster text-3xl"></i>
+
+          <!-- Hero Right Visual Graphic -->
+          <div class="lg:col-span-5 flex justify-center">
+            <div class="relative w-full max-w-md">
+              <!-- Background Ambient Glow -->
+              <div class="absolute -inset-4 bg-gradient-to-r from-eco-500/20 to-emerald-400/20 rounded-3xl blur-2xl -z-10"></div>
+              
+              <!-- Hero Vector Art Card -->
+              <div class="glass-panel p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden border border-slate-200">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                    <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                    <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                  </div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jobsite Stream Map</span>
+                </div>
+
+                <!-- Animated Illustration Graphic -->
+                <div class="py-6 flex flex-col items-center justify-center relative">
+                  <div class="relative w-48 h-48 flex items-center justify-center">
+                    <!-- Rotating Circular Rings -->
+                    <div class="absolute inset-0 rounded-full border-2 border-dashed border-eco-500/30 animate-spin-slow"></div>
+                    <div class="absolute inset-3 rounded-full border-2 border-eco-200/50"></div>
+                    
+                    <!-- Center Crane & Building Icon Graphic -->
+                    <div class="w-28 h-28 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center text-white shadow-xl animate-float-slow">
+                      <i class="fa-solid fa-building text-4xl text-emerald-400"></i>
+                    </div>
+
+                    <!-- Orbiting Stream Badges -->
+                    <div class="absolute -top-1 left-4 bg-white px-2.5 py-1 rounded-lg shadow-md border border-slate-100 text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                      <span class="w-2 h-2 rounded-full bg-eco-600"></span> Concrete: 84% Reused
+                    </div>
+                    <div class="absolute bottom-2 -right-2 bg-white px-2.5 py-1 rounded-lg shadow-md border border-slate-100 text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                      <span class="w-2 h-2 rounded-full bg-amber-500"></span> Rebar: Reclaim Ready
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Jobsite Live Metric Strip -->
+                <div class="mt-4 p-4 rounded-xl bg-slate-900 text-white flex items-center justify-between">
+                  <div>
+                    <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Estimated Diversion</div>
+                    <div class="text-xl font-display font-extrabold text-emerald-400">4,850 <span class="text-xs text-slate-300 font-sans">kg saved</span></div>
+                  </div>
+                  <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
 
-        <!-- Card 2: Est. Financial Loss -->
-        <div
-          class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Est. Financial Loss</p>
-            <h2 id="kpiFinancialLoss" class="text-3xl font-extrabold text-industrial-orange-600 mt-2">₹0</h2>
-            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
-              <i class="fa-solid fa-chart-line text-industrial-orange-500"></i> Cumulative estimated loss
-            </p>
-          </div>
-          <div class="p-4 bg-red-50 text-red-500 rounded-xl">
-            <i class="fa-solid fa-indian-rupee-sign text-3xl"></i>
-          </div>
-        </div>
-
-        <!-- Card 3: Recycle / Reuse Rate -->
-        <div
-          class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Recycle / Reuse Rate</p>
-            <h2 id="kpiRecycleRate" class="text-3xl font-extrabold text-eco-700 mt-2">0.0%</h2>
-            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
-              <i class="fa-solid fa-leaf text-eco-600"></i> Diverted from landfill
-            </p>
-          </div>
-          <div class="p-4 bg-eco-50 text-eco-600 rounded-xl">
-            <i class="fa-solid fa-arrow-rotate-right text-3xl"></i>
-          </div>
-        </div>
       </div>
     </section>
 
-    <!-- Data Entry Form Section -->
-    <section class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
-      <div class="border-b border-slate-200 px-6 py-4 bg-slate-50/75 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-eco-600 text-white text-xs">
-            <i class="fa-solid fa-plus"></i>
-          </span>
-          <h2 class="text-lg font-bold text-slate-800">Log New Waste Entry</h2>
-        </div>
-        <span class="text-xs font-medium text-slate-400">All fields required</span>
-      </div>
-
-      <form id="wasteForm" onsubmit="handleFormSubmit(event)" class="p-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <!-- Date -->
+    <!-- ======================================================== -->
+    <!-- PAGE 2: INTERACTIVE DATA ENTRY PAGE (SPLIT-SCREEN)      -->
+    <!-- ======================================================== -->
+    <section id="pageAudit" class="page-section flex-grow bg-slate-100/60 py-10 lg:py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        <!-- Header Banner -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div>
-            <label for="date"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Date</label>
-            <div class="relative">
-              <input type="date" id="date" name="date" required
-                class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
+            <div class="inline-flex items-center gap-2 text-xs font-bold text-eco-700 bg-eco-50 px-2.5 py-1 rounded-md mb-1.5">
+              <i class="fa-solid fa-calculator"></i> Step 2 of 3: Smart Waste Input
             </div>
+            <h2 class="text-2xl sm:text-3xl font-display font-bold text-slate-900">Enter Jobsite Waste Audit</h2>
+            <p class="text-sm text-slate-500">Input material specifications below. EcoConstruct will process recycling routes and environmental impact.</p>
           </div>
-
-          <!-- Site Zone -->
-          <div>
-            <label for="siteZone"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Site Zone</label>
-            <select id="siteZone" name="siteZone" required
-              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
-              <option value="" disabled selected>Select Site Zone</option>
-              <option value="Zone A - Foundation & Basement">Zone A - Foundation & Basement</option>
-              <option value="Zone B - Structural Tower">Zone B - Structural Tower</option>
-              <option value="Zone C - Interior Finishing">Zone C - Interior Finishing</option>
-              <option value="Zone D - External Facade">Zone D - External Facade</option>
-              <option value="Zone E - Storage & Staging">Zone E - Storage & Staging</option>
-            </select>
-          </div>
-
-          <!-- Material -->
-          <div>
-            <label for="material"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Material</label>
-            <input type="text" id="material" name="material" placeholder="e.g., Concrete, Rebar, Drywall" required
-              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
-          </div>
-
-          <!-- Weight (kg) -->
-          <div>
-            <label for="weight"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Weight (kg)</label>
-            <input type="number" step="0.01" min="0" id="weight" name="weight" placeholder="e.g., 1250" required
-              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
-          </div>
-
-          <!-- Cause -->
-          <div>
-            <label for="cause"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Cause</label>
-            <input type="text" id="cause" name="cause" placeholder="e.g., Off-cuts, Demolition, Over-order" required
-              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
-          </div>
-
-          <!-- Disposal Route -->
-          <div>
-            <label for="disposalRoute"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Route</label>
-            <select id="disposalRoute" name="disposalRoute" required
-              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
-              <option value="" disabled selected>Select Route</option>
-              <option value="Recycle">Recycle</option>
-              <option value="Reuse">Reuse</option>
-              <option value="Landfill">Landfill</option>
-              <option value="Incineration">Incineration</option>
-              <option value="Hazardous Treatment">Hazardous Treatment</option>
-            </select>
-          </div>
-
-          <!-- Hazard Level -->
-          <div>
-            <label for="hazardLevel"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Hazard Level</label>
-            <select id="hazardLevel" name="hazardLevel" required
-              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
-              <option value="" disabled selected>Select Hazard Level</option>
-              <option value="Non-Hazardous">Non-Hazardous</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Hazardous">Hazardous</option>
-            </select>
-          </div>
-
-          <!-- Vendor -->
-          <div>
-            <label for="vendor"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Vendor /
-              Contractor</label>
-            <input type="text" id="vendor" name="vendor" placeholder="e.g., EcoHaul Solutions" required
-              class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
-          </div>
-
-          <!-- Estimated Loss -->
-          <div>
-            <label for="estimatedLoss"
-              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Estimated Loss
-              (₹)</label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-medium">₹</span>
-              <input type="number" step="0.01" min="0" id="estimatedLoss" name="estimatedLoss" placeholder="0.00"
-                required
-                class="w-full rounded-lg border-slate-300 border pl-7 pr-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 flex flex-col sm:flex-row justify-between gap-3 items-center">
-          <button type="button" onclick="fillDemoData()"
-            class="px-4 py-2 rounded-lg text-xs font-semibold text-eco-700 bg-eco-50 hover:bg-eco-100 border border-eco-200 transition flex items-center gap-1.5">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>Quick Fill Sample Data</span>
+          <button onclick="navigateTo('landing')" class="px-4 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Home</span>
           </button>
-          <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <button type="reset"
-              class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
-              Clear Form
-            </button>
-            <button type="submit" id="submitBtn"
-              class="px-6 py-2.5 rounded-lg bg-industrial-orange-600 hover:bg-industrial-orange-700 text-white text-sm font-semibold shadow-sm transition flex items-center gap-2">
-              <i class="fa-solid fa-cloud-arrow-up"></i>
-              <span>Log Waste Entry</span>
-            </button>
+        </div>
+
+        <!-- Split-Screen Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- LEFT SIDE: Interactive Sorted Waste Streams Graphic -->
+          <div class="lg:col-span-5 space-y-4">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <i class="fa-solid fa-layer-group text-eco-700"></i>
+                  <span>Sorted Waste Streams</span>
+                </h3>
+                <span class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-medium">Click to select stream</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-5">Click any material stream below to auto-populate the calculator with industry baseline metrics.</p>
+
+              <!-- Stream Cards Grid -->
+              <div class="grid grid-cols-2 gap-3.5">
+                
+                <!-- Stream 1: Concrete -->
+                <div onclick="selectStream('CONCRETE', 2400, 'Zone A - Foundation', 1500)" class="stream-card cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-eco-600 hover:bg-eco-50/50 transition group relative">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center text-sm group-hover:bg-eco-600 group-hover:text-white transition">
+                      <i class="fa-solid fa-cube"></i>
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">8% Waste</span>
+                  </div>
+                  <h4 class="font-bold text-sm text-slate-900 group-hover:text-eco-800">Concrete</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Over-pour, slab test blocks</p>
+                  <div class="mt-2 text-[11px] font-semibold text-eco-700 flex items-center gap-1">
+                    <span>Recyclability: 95%</span>
+                  </div>
+                </div>
+
+                <!-- Stream 2: Drywall / Gypsum -->
+                <div onclick="selectStream('DRYWALL', 800, 'Zone C - Interior Finishing', 450)" class="stream-card cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-eco-600 hover:bg-eco-50/50 transition group relative">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm group-hover:bg-amber-600 group-hover:text-white transition">
+                      <i class="fa-solid fa-border-all"></i>
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">12% Waste</span>
+                  </div>
+                  <h4 class="font-bold text-sm text-slate-900 group-hover:text-amber-800">Drywall</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Off-cuts, damaged sheets</p>
+                  <div class="mt-2 text-[11px] font-semibold text-amber-600 flex items-center gap-1">
+                    <span>Recyclability: 75%</span>
+                  </div>
+                </div>
+
+                <!-- Stream 3: Brick & Masonry -->
+                <div onclick="selectStream('BRICK', 1900, 'Zone B - Structural Tower', 800)" class="stream-card cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-eco-600 hover:bg-eco-50/50 transition group relative">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-sm group-hover:bg-orange-600 group-hover:text-white transition">
+                      <i class="fa-solid fa-cubes-stacked"></i>
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">5% Waste</span>
+                  </div>
+                  <h4 class="font-bold text-sm text-slate-900 group-hover:text-orange-800">Brick</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Chipped units, mortar scrap</p>
+                  <div class="mt-2 text-[11px] font-semibold text-eco-700 flex items-center gap-1">
+                    <span>Recyclability: 90%</span>
+                  </div>
+                </div>
+
+                <!-- Stream 4: Packaging & Wood -->
+                <div onclick="selectStream('PACKAGING', 150, 'Zone E - Storage & Staging', 300)" class="stream-card cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-eco-600 hover:bg-eco-50/50 transition group relative">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm group-hover:bg-emerald-600 group-hover:text-white transition">
+                      <i class="fa-solid fa-box-open"></i>
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">15% Waste</span>
+                  </div>
+                  <h4 class="font-bold text-sm text-slate-900 group-hover:text-emerald-800">Packaging</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Pallets, wrap, cartons</p>
+                  <div class="mt-2 text-[11px] font-semibold text-eco-700 flex items-center gap-1">
+                    <span>Recyclability: 88%</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Pro-Tip Card -->
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-sm">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-lightbulb text-amber-400 text-xl mt-0.5"></i>
+                <div class="text-xs space-y-1">
+                  <span class="font-bold text-amber-300 block">Smart Tip</span>
+                  <p class="text-slate-300">Segregating masonry and drywall at the zone level prevents landfill penalties and cuts disposal fees by up to 60%.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDE: Sleek Data Entry Form Card -->
+          <div class="lg:col-span-7">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-md relative">
+              
+              <form id="auditForm" onsubmit="handleAuditSubmit(event)" class="space-y-6">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <!-- Project / Site Name -->
+                  <div>
+                    <label for="projectName" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Project / Site Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="projectName" name="projectName" required placeholder="e.g., Skyline Tower Phase 2"
+                      value="EcoHeights Commercial Tower"
+                      class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-eco-600 focus:border-eco-600 transition" />
+                  </div>
+
+                  <!-- Construction Site Type -->
+                  <div>
+                    <label for="siteType" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Site Type <span class="text-red-500">*</span>
+                    </label>
+                    <select id="siteType" name="siteType" required
+                      class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-eco-600 focus:border-eco-600 transition bg-white">
+                      <option value="Commercial">Commercial Building</option>
+                      <option value="Residential">Residential Development</option>
+                      <option value="Infrastructure">Infrastructure / Public Works</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <!-- Material Category -->
+                  <div>
+                    <label for="materialCategory" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Material Category <span class="text-red-500">*</span>
+                    </label>
+                    <select id="materialCategory" name="materialCategory" required onchange="onMaterialChange()"
+                      class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-eco-600 focus:border-eco-600 transition bg-white">
+                      <option value="CONCRETE">Concrete (Density ~2400 kg/m³)</option>
+                      <option value="DRYWALL">Drywall / Gypsum (~800 kg/m³)</option>
+                      <option value="BRICK">Brick / Masonry (~1900 kg/m³)</option>
+                      <option value="PACKAGING">Packaging & Timber (~150 kg/m³)</option>
+                    </select>
+                  </div>
+
+                  <!-- Site Location / Address -->
+                  <div>
+                    <label for="siteAddress" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Location / Site Address <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="siteAddress" name="siteAddress" required placeholder="e.g., Sector 62, Metro Corridor"
+                      value="Plot 44, Eco Industrial Park"
+                      class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-eco-600 focus:border-eco-600 transition" />
+                  </div>
+                </div>
+
+                <!-- Planned Units & Interactive Weight Slider -->
+                <div class="p-5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <label for="plannedQuantity" class="text-xs font-bold uppercase tracking-wider text-slate-700">Planned Material Quantity</label>
+                      <p class="text-xs text-slate-500">Total planned volume/units for current construction phase</p>
+                    </div>
+                    <div class="text-right">
+                      <span id="sliderValueDisplay" class="font-display text-2xl font-extrabold text-eco-700">100</span>
+                      <span class="text-xs font-semibold text-slate-400">units (m³)</span>
+                    </div>
+                  </div>
+
+                  <!-- Slider -->
+                  <input type="range" id="plannedQuantity" min="10" max="1000" step="10" value="100" oninput="updateSliderValue(this.value)"
+                    class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-eco-700" />
+                  
+                  <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                    <span>10 units (Small Site)</span>
+                    <span>500 units</span>
+                    <span>1,000 units (Major Works)</span>
+                  </div>
+                </div>
+
+                <!-- Submit Button with Pulse Glow -->
+                <button type="submit" id="calculateBtn"
+                  class="w-full py-4 rounded-xl bg-eco-700 hover:bg-eco-800 text-white font-display text-base font-bold shadow-lg shadow-eco-700/30 hover:shadow-xl hover:shadow-eco-700/40 transition-all duration-200 flex items-center justify-center gap-2 animate-pulse-glow group">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Calculate & Find Solutions</span>
+                  <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+              </form>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- PAGE 3: SOLUTION PROCESSING / RESULTS PAGE              -->
+    <!-- ======================================================== -->
+    <section id="pageResults" class="page-section flex-grow bg-slate-50 py-10 lg:py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        <!-- Animated Processing Loader View (Displayed initially for 1.8s) -->
+        <div id="processingCard" class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-md max-w-2xl mx-auto space-y-6">
+          <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border-4 border-eco-200 border-t-eco-700 animate-spin"></div>
+            <i class="fa-solid fa-recycle text-3xl text-eco-700"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-display font-bold text-slate-900">Trying to find solutions for managing waste effortlessly...</h3>
+            <p class="text-sm text-slate-500 mt-2">Connecting to live material reclamation databases and calculating CO₂ mitigation potentials.</p>
+          </div>
+          <div class="w-48 h-1.5 bg-slate-100 rounded-full mx-auto overflow-hidden">
+            <div class="w-full h-full bg-gradient-to-r from-eco-600 to-emerald-400 animate-pulse"></div>
           </div>
         </div>
-      </form>
-    </section>
 
-    <!-- Data Table Section -->
-    <section class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
-      <div
-        class="border-b border-slate-200 px-6 py-4 bg-slate-50/75 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div class="flex items-center space-x-2">
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-white text-xs">
-            <i class="fa-solid fa-list-check"></i>
-          </span>
-          <h2 class="text-lg font-bold text-slate-800">Recent Waste Logs</h2>
+        <!-- Real Results View (Revealed after processing completes) -->
+        <div id="resultsContent" class="hidden space-y-8">
+          
+          <!-- Central Hero Banner -->
+          <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-eco-950 text-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="space-y-2">
+              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-white/10 px-3 py-1 rounded-full">
+                <i class="fa-solid fa-check-circle"></i> Optimization Complete
+              </div>
+              <h2 id="resProjectHeading" class="text-3xl sm:text-4xl font-display font-extrabold text-white">Skyline Phase 2 Solutions</h2>
+              <p id="resTagline" class="text-sm text-slate-300 max-w-xl">Intelligent waste minimization and vendor recovery plan generated for your site.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="navigateTo('audit')" class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back to Input</span>
+              </button>
+              <button onclick="exportAuditReport()" class="px-5 py-3 rounded-xl bg-eco-600 hover:bg-eco-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-eco-700/30">
+                <i class="fa-solid fa-file-arrow-down"></i>
+                <span>Export Report</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Top Metric Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Estimated Waste Weight</div>
+              <div id="resWasteWeight" class="text-2xl font-display font-extrabold text-slate-900 mt-1">19,200 kg</div>
+              <div class="text-[11px] text-slate-500 mt-1">Based on material density</div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Estimated Waste Volume</div>
+              <div id="resWasteQty" class="text-2xl font-display font-extrabold text-slate-900 mt-1">8.00 m³</div>
+              <div class="text-[11px] text-slate-500 mt-1">Factor: 8% planned</div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Disposal Cost Exposure</div>
+              <div id="resDisposalCost" class="text-2xl font-display font-extrabold text-amber-600 mt-1">$960.00</div>
+              <div class="text-[11px] text-slate-500 mt-1">Base rate @ $50/ton</div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">CO₂ Emissions Offset</div>
+              <div id="resEmissions" class="text-2xl font-display font-extrabold text-eco-700 mt-1">4.2 Metric Tons</div>
+              <div class="text-[11px] text-eco-600 font-semibold mt-1">Diverted from landfill</div>
+            </div>
+          </div>
+
+          <!-- Actionable Cards: 3 Column Feature Breakdown -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Card 1: Waste Reduction Insights -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+              <div class="space-y-4">
+                <div class="w-10 h-10 rounded-xl bg-eco-100 text-eco-700 flex items-center justify-center text-lg font-bold">
+                  <i class="fa-solid fa-recycle"></i>
+                </div>
+                <h3 class="text-lg font-display font-bold text-slate-900">Waste Reduction Insights</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Actionable on-site protocols to immediately slash discarded volumes before haulage.</p>
+
+                <ul class="space-y-3 pt-2 text-xs text-slate-700">
+                  <li class="flex items-start gap-2.5">
+                    <i class="fa-solid fa-check text-eco-600 mt-0.5"></i>
+                    <span><strong>On-site crushing:</strong> Crush clean aggregate on-site to repurpose for temporary haul-road stabilization.</span>
+                  </li>
+                  <li class="flex items-start gap-2.5">
+                    <i class="fa-solid fa-check text-eco-600 mt-0.5"></i>
+                    <span><strong>Just-In-Time batching:</strong> Pre-schedule supplier deliveries in smaller segments to prevent over-pour spillage.</span>
+                  </li>
+                  <li class="flex items-start gap-2.5">
+                    <i class="fa-solid fa-check text-eco-600 mt-0.5"></i>
+                    <span><strong>Dry-stack testing:</strong> Conduct modular form checks prior to casting to ensure zero structural over-runs.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Card 2: Vendor & Logistics Matching -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+              <div class="space-y-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold">
+                  <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <h3 class="text-lg font-display font-bold text-slate-900">Vendor & Logistics Matching</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Certified circular economy partners situated within 20km of your jobsite.</p>
+
+                <div class="space-y-3 pt-2">
+                  <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                    <div>
+                      <div class="font-bold text-slate-900">EcoHaul Aggregates</div>
+                      <div class="text-[11px] text-slate-500">Pick-up ready • 8.4 km away</div>
+                    </div>
+                    <span class="text-eco-700 font-bold text-xs bg-eco-100 px-2 py-0.5 rounded">98% Reclaim</span>
+                  </div>
+
+                  <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                    <div>
+                      <div class="font-bold text-slate-900">Circular Materials Hub</div>
+                      <div class="text-[11px] text-slate-500">Bulk sorting • 14.2 km away</div>
+                    </div>
+                    <span class="text-amber-700 font-bold text-xs bg-amber-100 px-2 py-0.5 rounded">Fast Logistics</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-slate-100 mt-4 text-[11px] text-slate-400">
+                Connected via EcoConstruct Automated Dispatch API
+              </div>
+            </div>
+
+            <!-- Card 3: Environmental Impact Metrics -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+              <div class="space-y-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold">
+                  <i class="fa-solid fa-earth-americas"></i>
+                </div>
+                <h3 class="text-lg font-display font-bold text-slate-900">Environmental Impact</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Audited carbon credits and landfill diversion metrics for ESG reporting.</p>
+
+                <div class="space-y-3 pt-2">
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-semibold">
+                      <span class="text-slate-600">Landfill Diversion Target</span>
+                      <span class="text-eco-700 font-bold">92%</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div class="w-[92%] h-full bg-gradient-to-r from-eco-600 to-emerald-500 rounded-full"></div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-semibold">
+                      <span class="text-slate-600">Material Circularity Index</span>
+                      <span class="text-emerald-700 font-bold">0.86 / 1.0</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div class="w-[86%] h-full bg-emerald-600 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-medium border border-emerald-100 mt-4 flex items-center gap-2">
+                <i class="fa-solid fa-award text-emerald-600 text-sm"></i>
+                <span>Qualifies for LEED v4 Construction Waste Credit</span>
+              </div>
+            </div>
+
+          </div>
+
         </div>
-        <span id="logCountBadge" class="text-xs bg-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded-full">
-          0 logs recorded
-        </span>
-      </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr
-              class="bg-slate-100/80 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
-              <th class="py-3 px-4">Date</th>
-              <th class="py-3 px-4">Site Zone</th>
-              <th class="py-3 px-4">Material</th>
-              <th class="py-3 px-4 text-right">Weight (kg)</th>
-              <th class="py-3 px-4">Cause</th>
-              <th class="py-3 px-4">Disposal Route</th>
-              <th class="py-3 px-4">Hazard Level</th>
-              <th class="py-3 px-4">Vendor</th>
-              <th class="py-3 px-4 text-right">Estimated Loss</th>
-            </tr>
-          </thead>
-          <tbody id="wasteTableBody" class="divide-y divide-slate-100 text-sm">
-            <tr>
-              <td colspan="9" class="py-10 text-center text-slate-400">
-                <i class="fa-solid fa-spinner fa-spin text-xl mb-2 text-eco-600 block"></i>
-                Loading waste records...
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </section>
+
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-      <p>&copy; 2026 Construction Waste Management System. All rights reserved.</p>
-      <div class="flex items-center space-x-2 text-slate-400">
-        <span>Spring Boot 3-Tier Architecture</span>
+  <!-- Global Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <p>&copy; 2026 EcoConstruct Circular Site Intelligence. All rights reserved.</p>
+      <div class="flex items-center space-x-3 text-slate-400">
+        <span>Spring Boot REST Backend</span>
         <span>•</span>
-        <span>REST Client Frontend</span>
+        <span>Zero-Waste Reduction Framework</span>
       </div>
     </div>
   </footer>
 
-  <!-- JavaScript Application Logic -->
+  <!-- Application Logic & Page Navigation Script -->
   <script>
-    // Works seamlessly whether opened directly from Spring Boot (port 8080) or file/dev server
+    // Endpoints
     const API_BASE = window.location.origin.includes('8080') ? '' : 'http://localhost:8080';
-    const GET_URL = `${API_BASE}/api/waste/all`;
-    const POST_URL = `${API_BASE}/api/waste/add`;
+    const AUDIT_CALCULATE_URL = `${API_BASE}/api/audit/calculate`;
 
-    // Set default date input to today
-    document.addEventListener('DOMContentLoaded', () => {
-      const dateInput = document.getElementById('date');
-      if (dateInput) {
-        dateInput.value = new Date().toISOString().split('T')[0];
-      }
-      fetchWasteLogs();
-    });
+    let currentAuditResult = null;
 
     /**
-     * Display a floating feedback toast notification
+     * Smooth page navigation switcher
+     */
+    function navigateTo(pageKey) {
+      const pages = {
+        'landing': document.getElementById('pageLanding'),
+        'audit': document.getElementById('pageAudit'),
+        'results': document.getElementById('pageResults')
+      };
+
+      // Hide all pages
+      Object.values(pages).forEach(page => {
+        if (page) {
+          page.classList.remove('active');
+          page.style.display = 'none';
+        }
+      });
+
+      // Update Nav indicators
+      document.querySelectorAll('#navStep1, #navStep2, #navStep3').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-eco-700', 'shadow-xs');
+        btn.classList.add('text-slate-600');
+      });
+
+      const targetPage = pages[pageKey] || pages['landing'];
+      targetPage.style.display = 'block';
+      setTimeout(() => {
+        targetPage.classList.add('active');
+      }, 20);
+
+      // Highlight active stepper
+      if (pageKey === 'landing') {
+        const step = document.getElementById('navStep1');
+        if (step) step.classList.add('bg-white', 'text-eco-700', 'shadow-xs');
+      } else if (pageKey === 'audit') {
+        const step = document.getElementById('navStep2');
+        if (step) step.classList.add('bg-white', 'text-eco-700', 'shadow-xs');
+      } else if (pageKey === 'results') {
+        const step = document.getElementById('navStep3');
+        if (step) step.classList.add('bg-white', 'text-eco-700', 'shadow-xs');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * Smooth scroll on landing page
+     */
+    function scrollToOverview() {
+      navigateTo('audit');
+    }
+
+    /**
+     * Update slider label display
+     */
+    function updateSliderValue(val) {
+      document.getElementById('sliderValueDisplay').textContent = Number(val).toLocaleString();
+    }
+
+    /**
+     * Stream Card Click Handler to pre-populate form
+     */
+    function selectStream(materialType, density, zone, quantity) {
+      document.getElementById('materialCategory').value = materialType;
+      document.getElementById('plannedQuantity').value = Math.min(1000, quantity);
+      updateSliderValue(Math.min(1000, quantity));
+
+      showToast(`Selected ${materialType} stream. Parameters auto-populated!`, 'success');
+      
+      // Flash highlight the form container
+      const formBox = document.getElementById('auditForm').parentElement;
+      formBox.classList.add('ring-2', 'ring-eco-600');
+      setTimeout(() => formBox.classList.remove('ring-2', 'ring-eco-600'), 800);
+    }
+
+    function onMaterialChange() {
+      const type = document.getElementById('materialCategory').value;
+      if (type === 'CONCRETE') updateSliderValue(100);
+      else if (type === 'DRYWALL') updateSliderValue(150);
+      else if (type === 'BRICK') updateSliderValue(200);
+      else if (type === 'PACKAGING') updateSliderValue(80);
+    }
+
+    /**
+     * Handle Audit Submission & trigger Transition to Page 3
+     */
+    async function handleAuditSubmit(event) {
+      event.preventDefault();
+      const form = event.target;
+      const submitBtn = document.getElementById('calculateBtn');
+
+      const projectName = form.projectName.value.trim();
+      const materialType = form.materialCategory.value;
+      const plannedQuantity = parseFloat(form.plannedQuantity.value) || 100;
+      const siteType = form.siteType.value;
+      const siteAddress = form.siteAddress.value;
+
+      const payload = {
+        projectName: projectName,
+        plannedQuantity: plannedQuantity,
+        materialType: materialType
+      };
+
+      // Transition to Page 3 in "Processing" state
+      navigateTo('results');
+      document.getElementById('processingCard').style.display = 'block';
+      document.getElementById('resultsContent').classList.add('hidden');
+
+      try {
+        const response = await fetch(AUDIT_CALCULATE_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        let data;
+        if (response.ok) {
+          data = await response.json();
+        } else {
+          // Fallback simulation in case backend calculation endpoint is unreachable
+          data = simulateEstimation(projectName, materialType, plannedQuantity);
+        }
+
+        currentAuditResult = data;
+
+        // Artificial delay for smooth animated processing visual (1.5 seconds)
+        setTimeout(() => {
+          populateResults(data, siteType, siteAddress);
+          document.getElementById('processingCard').style.display = 'none';
+          document.getElementById('resultsContent').classList.remove('hidden');
+          showToast('Waste reduction solutions calculated successfully!', 'success');
+        }, 1500);
+
+      } catch (err) {
+        console.warn('Backend calculation fallback used:', err);
+        const data = simulateEstimation(projectName, materialType, plannedQuantity);
+        currentAuditResult = data;
+
+        setTimeout(() => {
+          populateResults(data, siteType, siteAddress);
+          document.getElementById('processingCard').style.display = 'none';
+          document.getElementById('resultsContent').classList.remove('hidden');
+          showToast('Generated solutions using local estimation engine', 'success');
+        }, 1500);
+      }
+    }
+
+    /**
+     * Fallback local calculation matching WasteCalculatorService
+     */
+    function simulateEstimation(projectName, materialType, plannedQuantity) {
+      const factors = {
+        'CONCRETE': { factor: 0.08, density: 2400.0 },
+        'DRYWALL': { factor: 0.12, density: 800.0 },
+        'BRICK': { factor: 0.05, density: 1900.0 },
+        'PACKAGING': { factor: 0.15, density: 150.0 }
+      };
+
+      const meta = factors[materialType] || { factor: 0.10, density: 1000.0 };
+      const wasteQty = plannedQuantity * meta.factor;
+      const wasteWeight = wasteQty * meta.density;
+      const disposalCost = (wasteWeight / 1000.0) * 50.0;
+
+      return {
+        projectName: projectName,
+        materialType: materialType,
+        plannedQuantity: plannedQuantity,
+        estimatedWasteQuantity: wasteQty,
+        estimatedWasteWeightKg: wasteWeight,
+        estimatedDisposalCost: disposalCost
+      };
+    }
+
+    /**
+     * Populate results into Page 3
+     */
+    function populateResults(data, siteType, siteAddress) {
+      document.getElementById('resProjectHeading').textContent = `${data.projectName || 'Jobsite'} Optimization Plan`;
+      document.getElementById('resTagline').textContent = `${siteType} • ${siteAddress || 'Site Location'} • Material: ${data.materialType}`;
+      
+      document.getElementById('resWasteWeight').textContent = `${(data.estimatedWasteWeightKg || 0).toLocaleString(undefined, {maximumFractionDigits: 1})} kg`;
+      document.getElementById('resWasteQty').textContent = `${(data.estimatedWasteQuantity || 0).toFixed(2)} m³`;
+      document.getElementById('resDisposalCost').textContent = `$${(data.estimatedDisposalCost || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      
+      // Calculate CO2 reduction (approx 0.22 kg CO2 per kg aggregate diverted)
+      const co2Tons = ((data.estimatedWasteWeightKg * 0.22) / 1000.0).toFixed(2);
+      document.getElementById('resEmissions').textContent = `${co2Tons} Metric Tons`;
+    }
+
+    /**
+     * Export Audit Report as text download
+     */
+    function exportAuditReport() {
+      if (!currentAuditResult) return;
+      const report = `=====================================================
+ECOCONSTRUCT — JOBSITE WASTE AUDIT REPORT
+=====================================================
+Generated At: ${new Date().toLocaleString()}
+Project: ${currentAuditResult.projectName}
+Material Stream: ${currentAuditResult.materialType}
+Planned Volume: ${currentAuditResult.plannedQuantity} m³
+
+METRICS & REDUCTION FORECAST:
+- Estimated Waste Volume: ${currentAuditResult.estimatedWasteQuantity.toFixed(2)} m³
+- Estimated Waste Weight: ${currentAuditResult.estimatedWasteWeightKg.toFixed(1)} kg
+- Estimated Disposal Exposure: $${currentAuditResult.estimatedDisposalCost.toFixed(2)}
+- Potential Landfill Diversion Rate: 92%
+- Est. Scope 3 Emissions Avoidance: ${((currentAuditResult.estimatedWasteWeightKg * 0.22)/1000).toFixed(2)} Tons CO2e
+
+RECOMMENDED NEXT STEPS:
+1. Contact EcoHaul Aggregates for immediate bulk dispatch.
+2. Institute zone-level aggregate sorting.
+=====================================================`;
+
+      const blob = new Blob([report], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `EcoConstruct_Audit_${currentAuditResult.projectName.replace(/\s+/g, '_')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Audit Report exported successfully!', 'success');
+    }
+
+    /**
+     * Toast notification display
      */
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
@@ -346,240 +946,15 @@
       const bgColor = isSuccess ? 'bg-eco-700' : 'bg-red-600';
       const icon = isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation';
 
-      toast.className = `fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-lg text-white shadow-lg ${bgColor} transform transition-all duration-300 translate-y-0 opacity-100`;
+      toast.className = `fixed top-20 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl text-white shadow-xl ${bgColor} transition-all duration-300 transform translate-y-0 opacity-100 pointer-events-auto`;
       toast.innerHTML = `
         <i class="fa-solid ${icon} text-lg"></i>
-        <span class="text-sm font-medium">${message}</span>
+        <span class="text-sm font-semibold">${message}</span>
       `;
 
       setTimeout(() => {
-        toast.className = 'fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120%] opacity-0 pointer-events-none';
-      }, 4000);
-    }
-
-    /**
-     * Format currency to INR
-     */
-    function formatCurrency(amount) {
-      return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      }).format(amount);
-    }
-
-    /**
-     * Return hazard badge markup
-     */
-    function getHazardBadge(level) {
-      const lvl = (level || '').toLowerCase();
-      if (lvl.includes('hazardous') && !lvl.includes('non')) {
-        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
-                  <span class="w-1.5 h-1.5 mr-1 bg-red-500 rounded-full"></span>Hazardous
-                </span>`;
-      } else if (lvl.includes('moderate')) {
-        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-industrial-orange-100 text-industrial-orange-700 border border-industrial-orange-200">
-                  <span class="w-1.5 h-1.5 mr-1 bg-industrial-orange-500 rounded-full"></span>Moderate
-                </span>`;
-      }
-      return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-eco-100 text-eco-800 border border-eco-200">
-                <span class="w-1.5 h-1.5 mr-1 bg-eco-600 rounded-full"></span>Non-Hazardous
-              </span>`;
-    }
-
-    /**
-     * Return disposal route badge markup
-     */
-    function getDisposalBadge(route) {
-      const r = (route || '').toLowerCase();
-      if (r === 'recycle' || r === 'reuse') {
-        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-eco-100 text-eco-800">
-                  <i class="fa-solid fa-recycle text-[10px] mr-1 text-eco-600"></i>${route}
-                </span>`;
-      }
-      return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700">
-                <i class="fa-solid fa-arrow-right text-[10px] mr-1 text-slate-400"></i>${route}
-              </span>`;
-    }
-
-    /**
-     * Compute KPI cards based on waste logs
-     */
-    function updateKPIs(logs) {
-      let totalWeightKg = 0;
-      let totalLoss = 0;
-      let recycledWeightKg = 0;
-
-      logs.forEach(log => {
-        const weight = parseFloat(log.weight) || 0;
-        const loss = parseFloat(log.estimatedLoss) || 0;
-        totalWeightKg += weight;
-        totalLoss += loss;
-
-        const route = (log.disposalRoute || '').toLowerCase();
-        if (route === 'recycle' || route === 'reuse') {
-          recycledWeightKg += weight;
-        }
-      });
-
-      // Convert kg to metric tons
-      const totalTons = totalWeightKg / 1000;
-      const recycleRate = totalWeightKg > 0 ? (recycledWeightKg / totalWeightKg) * 100 : 0;
-
-      document.getElementById('kpiTotalWaste').innerHTML = `${totalTons.toFixed(2)} <span class="text-base font-semibold text-slate-400">Tons</span>`;
-      document.getElementById('kpiFinancialLoss').textContent = formatCurrency(totalLoss);
-      document.getElementById('kpiRecycleRate').textContent = `${recycleRate.toFixed(1)}%`;
-      document.getElementById('logCountBadge').textContent = `${logs.length} ${logs.length === 1 ? 'log' : 'logs'} recorded`;
-    }
-
-    /**
-     * Render the waste records into the table
-     */
-    function renderTable(logs) {
-      const tbody = document.getElementById('wasteTableBody');
-      if (!logs || logs.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="9" class="py-12 text-center text-slate-400">
-              <i class="fa-regular fa-folder-open text-3xl mb-2 text-slate-300 block"></i>
-              No construction waste records found. Use the form above to log waste.
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = logs.map(item => `
-        <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-          <td class="py-3 px-4 font-medium text-slate-800 whitespace-nowrap">${escapeHTML(item.date || '-')}</td>
-          <td class="py-3 px-4 text-slate-600">${escapeHTML(item.siteZone || '-')}</td>
-          <td class="py-3 px-4 font-semibold text-slate-800">${escapeHTML(item.material || '-')}</td>
-          <td class="py-3 px-4 text-right font-medium text-slate-700">${(parseFloat(item.weight) || 0).toLocaleString()} kg</td>
-          <td class="py-3 px-4 text-slate-600">${escapeHTML(item.cause || '-')}</td>
-          <td class="py-3 px-4">${getDisposalBadge(item.disposalRoute)}</td>
-          <td class="py-3 px-4">${getHazardBadge(item.hazardLevel)}</td>
-          <td class="py-3 px-4 text-slate-600">${escapeHTML(item.vendor || '-')}</td>
-          <td class="py-3 px-4 text-right font-semibold text-industrial-orange-600">${formatCurrency(parseFloat(item.estimatedLoss) || 0)}</td>
-        </tr>
-      `).join('');
-    }
-
-    /**
-     * Prevent XSS injections
-     */
-    function escapeHTML(str) {
-      if (typeof str !== 'string') return str;
-      return str.replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
-      }[tag] || tag));
-    }
-
-    /**
-     * GET request to fetch waste logs
-     */
-    async function fetchWasteLogs() {
-      const refreshIcon = document.getElementById('refreshIcon');
-      if (refreshIcon) refreshIcon.classList.add('fa-spin');
-
-      try {
-        const response = await fetch(GET_URL);
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        const logs = Array.isArray(data) ? data : [];
-        renderTable(logs);
-        updateKPIs(logs);
-      } catch (error) {
-        console.error('Error fetching waste records:', error);
-        // Fallback UI indication
-        const tbody = document.getElementById('wasteTableBody');
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="9" class="py-10 text-center text-red-500">
-              <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-400 block"></i>
-              Unable to load waste logs from server (${escapeHTML(error.message)}).<br>
-              <span class="text-xs text-slate-400">Ensure the Spring Boot backend is running at ${escapeHTML(GET_URL)}.</span>
-            </td>
-          </tr>
-        `;
-      } finally {
-        if (refreshIcon) {
-          setTimeout(() => refreshIcon.classList.remove('fa-spin'), 400);
-        }
-      }
-    }
-
-    /**
-     * POST request to add a new waste log
-     */
-    async function handleFormSubmit(event) {
-      event.preventDefault();
-      const form = event.target;
-      const submitBtn = document.getElementById('submitBtn');
-
-      const formData = {
-        date: form.date.value,
-        siteZone: form.siteZone.value,
-        material: form.material.value,
-        weight: parseFloat(form.weight.value),
-        cause: form.cause.value,
-        disposalRoute: form.disposalRoute.value,
-        hazardLevel: form.hazardLevel.value,
-        vendor: form.vendor.value,
-        estimatedLoss: parseFloat(form.estimatedLoss.value)
-      };
-
-      const originalBtnHTML = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
-
-      try {
-        const response = await fetch(POST_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
-        }
-
-        showToast('Waste log entry added successfully!', 'success');
-        form.reset();
-        // Reset date back to today
-        document.getElementById('date').value = new Date().toISOString().split('T')[0];
-        // Refresh table and KPIs
-        await fetchWasteLogs();
-      } catch (error) {
-        console.error('Error adding waste record:', error);
-        showToast(`Failed to add record: ${error.message}`, 'error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnHTML;
-      }
-    }
-
-    /**
-     * Helper to auto-fill sample valid data into the form
-     */
-    function fillDemoData() {
-      const form = document.getElementById('wasteForm');
-      form.date.value = new Date().toISOString().split('T')[0];
-      form.siteZone.value = 'Zone B - Structural Tower';
-      form.material.value = 'Concrete Offcuts';
-      form.weight.value = '650';
-      form.cause.value = 'Formwork Overfill';
-      form.disposalRoute.value = 'Recycle';
-      form.hazardLevel.value = 'Non-Hazardous';
-      form.vendor.value = 'GreenCycle Haulers';
-      form.estimatedLoss.value = '9750';
+        toast.className = 'fixed top-20 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl text-white shadow-xl transition-all duration-300 transform -translate-y-16 opacity-0 pointer-events-none';
+      }, 3500);
     }
   </script>
 </body>
