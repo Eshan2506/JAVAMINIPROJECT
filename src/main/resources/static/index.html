@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -36,18 +37,22 @@
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
+
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
 
   <!-- Header -->
   <header class="bg-gradient-to-r from-eco-900 via-eco-800 to-slate-900 text-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
       <div class="flex items-center space-x-3">
         <div class="p-2.5 bg-industrial-orange-500 rounded-lg shadow">
           <i class="fa-solid fa-recycle text-2xl text-white"></i>
         </div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            BuildCycle <span class="text-xs bg-industrial-orange-600 uppercase font-semibold px-2 py-0.5 rounded text-white tracking-wider">Waste Control</span>
+            BuildCycle <span
+              class="text-xs bg-industrial-orange-600 uppercase font-semibold px-2 py-0.5 rounded text-white tracking-wider">Waste
+              Control</span>
           </h1>
           <p class="text-xs text-eco-100">Construction Site Environmental & Resource Monitoring</p>
         </div>
@@ -57,7 +62,8 @@
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-eco-500 animate-pulse"></span>
           <span class="text-xs font-medium text-slate-200">Site Status: Active Sync</span>
         </div>
-        <button id="refreshBtn" onclick="fetchWasteLogs()" class="px-3 py-1.5 bg-eco-700 hover:bg-eco-600 rounded-md text-xs font-semibold flex items-center gap-1.5 transition">
+        <button id="refreshBtn" onclick="fetchWasteLogs()"
+          class="px-3 py-1.5 bg-eco-700 hover:bg-eco-600 rounded-md text-xs font-semibold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i> Refresh Data
         </button>
       </div>
@@ -65,7 +71,9 @@
   </header>
 
   <!-- Notification Toast Container -->
-  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120%] opacity-0 pointer-events-none"></div>
+  <div id="toast"
+    class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120%] opacity-0 pointer-events-none">
+  </div>
 
   <!-- Main Content -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -74,10 +82,12 @@
     <section>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Card 1: Total Waste Logged -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
+        <div
+          class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Waste Logged</p>
-            <h2 id="kpiTotalWaste" class="text-3xl font-extrabold text-slate-800 mt-2">0.00 <span class="text-base font-semibold text-slate-400">Tons</span></h2>
+            <h2 id="kpiTotalWaste" class="text-3xl font-extrabold text-slate-800 mt-2">0.00 <span
+                class="text-base font-semibold text-slate-400">Tons</span></h2>
             <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
               <i class="fa-solid fa-weight-hanging text-slate-400"></i> Aggregated site waste
             </p>
@@ -88,7 +98,8 @@
         </div>
 
         <!-- Card 2: Est. Financial Loss -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
+        <div
+          class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Est. Financial Loss</p>
             <h2 id="kpiFinancialLoss" class="text-3xl font-extrabold text-industrial-orange-600 mt-2">₹0</h2>
@@ -102,7 +113,8 @@
         </div>
 
         <!-- Card 3: Recycle / Reuse Rate -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
+        <div
+          class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6 flex items-center justify-between hover:shadow-md transition">
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Recycle / Reuse Rate</p>
             <h2 id="kpiRecycleRate" class="text-3xl font-extrabold text-eco-700 mt-2">0.0%</h2>
@@ -133,7 +145,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <!-- Date -->
           <div>
-            <label for="date" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Date</label>
+            <label for="date"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Date</label>
             <div class="relative">
               <input type="date" id="date" name="date" required
                 class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
@@ -142,7 +155,8 @@
 
           <!-- Site Zone -->
           <div>
-            <label for="siteZone" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Site Zone</label>
+            <label for="siteZone"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Site Zone</label>
             <select id="siteZone" name="siteZone" required
               class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
               <option value="" disabled selected>Select Site Zone</option>
@@ -156,28 +170,32 @@
 
           <!-- Material -->
           <div>
-            <label for="material" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Material</label>
+            <label for="material"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Material</label>
             <input type="text" id="material" name="material" placeholder="e.g., Concrete, Rebar, Drywall" required
               class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
           </div>
 
           <!-- Weight (kg) -->
           <div>
-            <label for="weight" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Weight (kg)</label>
+            <label for="weight"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Weight (kg)</label>
             <input type="number" step="0.01" min="0" id="weight" name="weight" placeholder="e.g., 1250" required
               class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
           </div>
 
           <!-- Cause -->
           <div>
-            <label for="cause" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Cause</label>
+            <label for="cause"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Cause</label>
             <input type="text" id="cause" name="cause" placeholder="e.g., Off-cuts, Demolition, Over-order" required
               class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
           </div>
 
           <!-- Disposal Route -->
           <div>
-            <label for="disposalRoute" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Route</label>
+            <label for="disposalRoute"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Route</label>
             <select id="disposalRoute" name="disposalRoute" required
               class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
               <option value="" disabled selected>Select Route</option>
@@ -191,7 +209,8 @@
 
           <!-- Hazard Level -->
           <div>
-            <label for="hazardLevel" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Hazard Level</label>
+            <label for="hazardLevel"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Hazard Level</label>
             <select id="hazardLevel" name="hazardLevel" required
               class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500 bg-white">
               <option value="" disabled selected>Select Hazard Level</option>
@@ -203,27 +222,34 @@
 
           <!-- Vendor -->
           <div>
-            <label for="vendor" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Vendor / Contractor</label>
+            <label for="vendor"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Disposal Vendor /
+              Contractor</label>
             <input type="text" id="vendor" name="vendor" placeholder="e.g., EcoHaul Solutions" required
               class="w-full rounded-lg border-slate-300 border px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
           </div>
 
           <!-- Estimated Loss -->
           <div>
-            <label for="estimatedLoss" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Estimated Loss (₹)</label>
+            <label for="estimatedLoss"
+              class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Estimated Loss
+              (₹)</label>
             <div class="relative">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-medium">₹</span>
-              <input type="number" step="0.01" min="0" id="estimatedLoss" name="estimatedLoss" placeholder="0.00" required
+              <input type="number" step="0.01" min="0" id="estimatedLoss" name="estimatedLoss" placeholder="0.00"
+                required
                 class="w-full rounded-lg border-slate-300 border pl-7 pr-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-eco-500" />
             </div>
           </div>
         </div>
 
         <div class="mt-6 flex justify-end gap-3 items-center">
-          <button type="reset" class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+          <button type="reset"
+            class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
             Clear Form
           </button>
-          <button type="submit" id="submitBtn" class="px-6 py-2.5 rounded-lg bg-industrial-orange-600 hover:bg-industrial-orange-700 text-white text-sm font-semibold shadow-sm transition flex items-center gap-2">
+          <button type="submit" id="submitBtn"
+            class="px-6 py-2.5 rounded-lg bg-industrial-orange-600 hover:bg-industrial-orange-700 text-white text-sm font-semibold shadow-sm transition flex items-center gap-2">
             <i class="fa-solid fa-cloud-arrow-up"></i>
             <span>Log Waste Entry</span>
           </button>
@@ -233,7 +259,8 @@
 
     <!-- Data Table Section -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
-      <div class="border-b border-slate-200 px-6 py-4 bg-slate-50/75 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div
+        class="border-b border-slate-200 px-6 py-4 bg-slate-50/75 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div class="flex items-center space-x-2">
           <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-white text-xs">
             <i class="fa-solid fa-list-check"></i>
@@ -248,7 +275,8 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-100/80 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
+            <tr
+              class="bg-slate-100/80 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
               <th class="py-3 px-4">Date</th>
               <th class="py-3 px-4">Site Zone</th>
               <th class="py-3 px-4">Material</th>
@@ -287,8 +315,10 @@
 
   <!-- JavaScript Application Logic -->
   <script>
-    const GET_URL = 'http://localhost:8080/api/waste/all';
-    const POST_URL = 'http://localhost:8080/api/waste/add';
+    // Works seamlessly whether opened directly from Spring Boot (port 8080) or file/dev server
+    const API_BASE = window.location.origin.includes('8080') ? '' : 'http://localhost:8080';
+    const GET_URL = `${API_BASE}/api/waste/all`;
+    const POST_URL = `${API_BASE}/api/waste/add`;
 
     // Set default date input to today
     document.addEventListener('DOMContentLoaded', () => {
@@ -529,4 +559,5 @@
     }
   </script>
 </body>
+
 </html>
